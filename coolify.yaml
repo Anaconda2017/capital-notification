@@ -1,0 +1,77 @@
+version: '1.0'
+
+# Coolify deployment configuration for Insurance Notification System
+deployment:
+  type: dockerfile
+  dockerfile: Dockerfile.production
+  
+# Environment variables that should be set in Coolify dashboard
+environment:
+  required:
+    - APP_NAME
+    - APP_ENV=production
+    - APP_KEY
+    - APP_DEBUG=false
+    - APP_URL
+    - DB_CONNECTION=mysql
+    - DB_HOST
+    - DB_PORT=3306
+    - DB_DATABASE
+    - DB_USERNAME
+    - DB_PASSWORD
+    - MAIL_MAILER=smtp
+    - MAIL_HOST
+    - MAIL_PORT=587
+    - MAIL_USERNAME
+    - MAIL_PASSWORD
+    - MAIL_ENCRYPTION=tls
+    - MAIL_FROM_ADDRESS
+    - MAIL_FROM_NAME
+
+# Build configuration
+build:
+  context: .
+  dockerfile: Dockerfile.production
+  args:
+    - COMPOSER_NO_DEV=1
+    - NPM_PRODUCTION=1
+
+# Health check configuration
+healthcheck:
+  test: ["CMD", "curl", "-f", "http://localhost/health"]
+  interval: 30s
+  timeout: 10s
+  retries: 3
+  start_period: 40s
+
+# Resource limits
+resources:
+  limits:
+    memory: 512M
+    cpu: 500m
+  requests:
+    memory: 256M
+    cpu: 250m
+
+# Port configuration
+ports:
+  - container: 80
+    host: 80
+    protocol: http
+
+# Volumes for persistent storage
+volumes:
+  - name: storage
+    mountPath: /var/www/html/storage
+    type: persistent
+  - name: uploads
+    mountPath: /var/www/html/public/uploads
+    type: persistent
+
+# Post-deployment commands
+postDeploy:
+  - php artisan migrate --force
+  - php artisan config:cache
+  - php artisan route:cache
+  - php artisan view:cache
+  - php artisan storage:link
