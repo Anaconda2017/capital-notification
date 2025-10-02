@@ -21,7 +21,8 @@ RUN apk add --no-cache \
     mysql-dev \
     nodejs \
     npm \
-    supervisor
+    supervisor \
+    libzip-dev
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-xpm \

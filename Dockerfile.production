@@ -19,6 +19,7 @@ RUN apk add --no-cache \
     nodejs \
     npm \
     supervisor \
+    libzip-dev \
     nginx
 
 # Install PHP extensions
