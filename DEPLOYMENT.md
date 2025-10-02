@@ -1,72 +1,49 @@
-# Deployment Guide
+# Deployment Guide for Insurance Notification System
 
-This guide explains how to deploy the Insurance Notification System to GitHub and then to Coolify.
+This guide will help you deploy the Insurance Notification System to Coolify.
 
-## 🚀 GitHub Setup
+## Prerequisites
 
-### 1. Initialize Git Repository
+- Coolify account and dashboard access
+- GitHub repository: https://github.com/Anaconda2017/capital-notification.git
+- Database (MySQL/PostgreSQL) - can be provided by Coolify or external
 
-```bash
-# Initialize git repository (if not already done)
-git init
+## Deployment Steps
 
-# Add all files
-git add .
+### 1. Connect Repository to Coolify
 
-# Create initial commit
-git commit -m "Initial commit: Insurance Notification System"
+1. Log in to your Coolify dashboard
+2. Create a new application
+3. Connect your GitHub repository: `https://github.com/Anaconda2017/capital-notification.git`
+4. Select the main branch
 
-# Add remote repository
-git remote add origin https://github.com/yourusername/insurance-notification.git
+### 2. Configure Application Settings
 
-# Push to GitHub
-git push -u origin main
-```
+#### Build Settings:
+- **Dockerfile Path**: `Dockerfile.production`
+- **Build Context**: `.` (root directory)
+- **Build Command**: (leave empty, handled by Dockerfile)
 
-### 2. GitHub Repository Setup
+#### Environment Variables:
+Set the following environment variables in Coolify:
 
-1. Create a new repository on GitHub
-2. Copy the repository URL
-3. Update the remote URL:
-   ```bash
-   git remote set-url origin https://github.com/yourusername/insurance-notification.git
-   ```
-
-## 🐳 Coolify Deployment
-
-### 1. Coolify Dashboard Setup
-
-1. **Login to Coolify Dashboard**
-2. **Create New Application**
-   - Click "New Application"
-   - Choose "Git Repository"
-   - Connect your GitHub repository
-
-### 2. Environment Variables
-
-Set these environment variables in Coolify dashboard:
-
-#### Required Variables
 ```env
+# Application
 APP_NAME="Insurance Notification System"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://your-domain.com
 APP_KEY=base64:your-generated-key-here
-```
 
-#### Database Configuration
-```env
+# Database
 DB_CONNECTION=mysql
-DB_HOST=your-mysql-host
+DB_HOST=your-database-host
 DB_PORT=3306
 DB_DATABASE=insurance_notification
 DB_USERNAME=your-db-username
 DB_PASSWORD=your-db-password
-```
 
-#### Mail Configuration
-```env
+# Mail Configuration
 MAIL_MAILER=smtp
 MAIL_HOST=your-smtp-host
 MAIL_PORT=587
@@ -75,133 +52,100 @@ MAIL_PASSWORD=your-email-password
 MAIL_ENCRYPTION=tls
 MAIL_FROM_ADDRESS=noreply@your-domain.com
 MAIL_FROM_NAME="Insurance Notification System"
-```
 
-#### Google OAuth (Optional)
-```env
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_REDIRECT_URL=https://your-domain.com/auth/google/callback
+# Google Cloud (for notifications)
+GOOGLE_APPLICATION_CREDENTIALS=/var/www/html/public/json/capital-insurance-8134f-59b950fe0de2.json
 ```
 
 ### 3. Database Setup
 
-#### Option 1: External Database
-- Use a managed MySQL service (AWS RDS, DigitalOcean, etc.)
-- Update environment variables with external database credentials
+#### Option A: Use Coolify Database Service
+1. In Coolify, add a MySQL service
+2. Set the database environment variables to use the service name as host
 
-#### Option 2: Coolify Database Service
-- Create a MySQL service in Coolify
-- Use the provided connection details in environment variables
+#### Option B: External Database
+1. Use your existing MySQL/PostgreSQL database
+2. Update the database environment variables accordingly
 
-### 4. Build Configuration
+### 4. Storage and File Permissions
 
-In Coolify dashboard:
+The application includes:
+- Google Cloud credentials for notifications: `public/json/capital-insurance-8134f-59b950fe0de2.json`
+- File uploads directory: `public/uploads/`
+- Storage symlink will be created automatically
 
-1. **Build Settings**
-   - Dockerfile: `Dockerfile.production`
-   - Build Context: `.`
+### 5. Health Check
 
-2. **Deployment Settings**
-   - Port: `80`
-   - Health Check: `http://localhost/health` (optional)
-
-### 5. Domain Configuration
-
-1. **Custom Domain**
-   - Add your domain in Coolify
-   - Update `APP_URL` environment variable
-   - Configure SSL certificate
-
-2. **Environment Variables Update**
-   ```env
-   APP_URL=https://your-domain.com
-   ```
-
-## 🔧 Post-Deployment Steps
-
-### 1. Database Migration
-
-After successful deployment, run migrations:
-
-```bash
-# In Coolify terminal or SSH
-php artisan migrate --force
+The application includes a health check endpoint at `/health` that returns:
+```json
+{
+    "status": "ok",
+    "timestamp": "2024-01-01T00:00:00.000000Z",
+    "service": "Insurance Notification System"
+}
 ```
 
-### 2. Storage Link
+### 6. Deployment Process
 
-```bash
-php artisan storage:link
-```
+1. **Build**: Coolify will build the Docker image using `Dockerfile.production`
+2. **Dependencies**: Composer dependencies will be installed
+3. **Migrations**: Database migrations will run automatically
+4. **Optimization**: Laravel will be optimized for production
+5. **Start**: Application will start with PHP-FPM
 
-### 3. Cache Optimization
+### 7. Post-Deployment
 
-```bash
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
-```
+After successful deployment:
 
-## 📁 File Structure for Deployment
+1. **Verify Health**: Visit `https://your-domain.com/health`
+2. **Test Notifications**: Ensure Google Cloud credentials are working
+3. **Check Logs**: Monitor application logs in Coolify dashboard
+4. **Database**: Verify data is accessible and migrations completed
 
-```
-├── Dockerfile.production     # Production Docker configuration
-├── docker-compose.yml        # Local development setup
-├── coolify.yaml             # Coolify-specific configuration
-├── deploy.sh                # Deployment script
-├── .env.example             # Environment template
-├── .gitignore               # Git ignore rules
-├── README.md                # Project documentation
-└── DEPLOYMENT.md            # This deployment guide
-```
+## Troubleshooting
 
-## 🔍 Troubleshooting
+### Common Issues:
 
-### Common Issues
+1. **Docker Build Fails**:
+   - Ensure `libzip-dev` is installed (fixed in latest version)
+   - Check PHP extension requirements
 
-1. **Build Failures**
-   - Check Dockerfile syntax
-   - Verify all dependencies are available
-   - Check build logs in Coolify
-
-2. **Database Connection Issues**
+2. **Database Connection Issues**:
    - Verify database credentials
-   - Check network connectivity
    - Ensure database service is running
+   - Check network connectivity
 
-3. **Permission Issues**
-   - Check file permissions in storage directory
-   - Verify web server user permissions
+3. **File Permission Issues**:
+   - Ensure storage directory is writable
+   - Check Google Cloud credentials file permissions
 
-4. **Environment Variables**
-   - Ensure all required variables are set
-   - Check variable names and values
-   - Verify no trailing spaces
+4. **Memory Issues**:
+   - Increase PHP memory limit if needed
+   - Monitor resource usage in Coolify
 
-### Logs
+### Logs Location:
+- Application logs: Coolify dashboard
+- Laravel logs: `storage/logs/` (accessible via Coolify file manager)
 
-Access logs in Coolify dashboard:
-- Application logs
-- Build logs
-- Deployment logs
+## Features Included:
 
-## 🚀 Production Checklist
+- ✅ User authentication and management
+- ✅ Multi-language support (Arabic/English)
+- ✅ Notification system with Google Cloud integration
+- ✅ File upload handling
+- ✅ Database integration
+- ✅ Email functionality
+- ✅ Image processing with Intervention Image
+- ✅ Health monitoring endpoint
 
-- [ ] Environment variables configured
-- [ ] Database connected and migrated
-- [ ] SSL certificate configured
-- [ ] Domain properly configured
-- [ ] File permissions set correctly
-- [ ] Cache optimized
-- [ ] Error logging configured
-- [ ] Backup strategy implemented
-- [ ] Monitoring setup
+## Support:
 
-## 📞 Support
+For deployment issues, check:
+1. Coolify documentation
+2. Laravel deployment guides
+3. Application logs in Coolify dashboard
 
-For deployment issues:
-1. Check Coolify documentation
-2. Review application logs
-3. Verify environment configuration
-4. Contact support team if needed
+---
+
+**Repository**: https://github.com/Anaconda2017/capital-notification.git
+**Last Updated**: October 2024
