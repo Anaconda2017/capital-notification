@@ -148,7 +148,8 @@ RUN echo "[supervisord]" > /etc/supervisor/conf.d/supervisord.conf \
     && echo "autorestart=true" >> /etc/supervisor/conf.d/supervisord.conf \
     && echo "user=root" >> /etc/supervisor/conf.d/supervisord.conf \
     && echo "redirect_stderr=true" >> /etc/supervisor/conf.d/supervisord.conf \
-    && echo "stdout_logfile=/var/log/php-fpm.log" >> /etc/supervisor/conf.d/supervisord.conf \
+    && echo "stdout_logfile=/dev/stdout" >> /etc/supervisor/conf.d/supervisord.conf \
+    && echo "stdout_logfile_maxbytes=0" >> /etc/supervisor/conf.d/supervisord.conf \
     && echo "" >> /etc/supervisor/conf.d/supervisord.conf \
     && echo "[program:nginx]" >> /etc/supervisor/conf.d/supervisord.conf \
     && echo "command=nginx -g 'daemon off;'" >> /etc/supervisor/conf.d/supervisord.conf \
@@ -156,13 +157,11 @@ RUN echo "[supervisord]" > /etc/supervisor/conf.d/supervisord.conf \
     && echo "autorestart=true" >> /etc/supervisor/conf.d/supervisord.conf \
     && echo "user=root" >> /etc/supervisor/conf.d/supervisord.conf \
     && echo "redirect_stderr=true" >> /etc/supervisor/conf.d/supervisord.conf \
-    && echo "stdout_logfile=/var/log/nginx.log" >> /etc/supervisor/conf.d/supervisord.conf
-
-# Switch to non-root user
-USER www
+    && echo "stdout_logfile=/dev/stdout" >> /etc/supervisor/conf.d/supervisord.conf \
+    && echo "stdout_logfile_maxbytes=0" >> /etc/supervisor/conf.d/supervisord.conf
 
 # Expose port
 EXPOSE 80
 
-# Start supervisor
+# Start supervisor as root (required for nginx and php-fpm)
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
