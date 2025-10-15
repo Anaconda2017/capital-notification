@@ -13,7 +13,8 @@ php artisan cache:clear || true
 
 # Rebuild caches for better performance
 php artisan config:cache || true
-php artisan route:cache || true
+# Temporarily disable route caching to debug
+# php artisan route:cache || true
 php artisan view:cache || true
 
 # Create storage link if not exists
