@@ -1,19 +1,27 @@
 #!/bin/bash
+set -e
 
-# Clear all caches
-php artisan cache:clear
-php artisan config:clear  
-php artisan route:clear
-php artisan view:clear
+echo "Starting application..."
+
+# Change to application directory
+cd /var/www/html
+
+# Clear all caches (ignore errors if cache doesn't exist)
+php artisan cache:clear || true
+php artisan config:clear || true
+php artisan route:clear || true
+php artisan view:clear || true
 
 # Rebuild caches
-php artisan config:cache
-php artisan route:cache
-php artisan view:cache
+php artisan config:cache || true
+php artisan route:cache || true
+php artisan view:cache || true
 
 # Create storage link if not exists
-php artisan storage:link
+php artisan storage:link || true
 
-# Start supervisor
-/usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
+echo "Application setup complete. Starting services..."
+
+# Start supervisor in foreground
+exec /usr/bin/supervisord -c /etc/supervisor/conf.d/supervisord.conf
 
