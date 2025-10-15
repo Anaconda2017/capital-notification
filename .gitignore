@@ -30,3 +30,7 @@ Thumbs.db
 /public/uploads/temp
 /public/uploads/cache
 /public/error_log
+
+# Google Cloud Service Account Keys
+public/json/*.json
+*.json
