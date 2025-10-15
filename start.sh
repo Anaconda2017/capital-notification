@@ -5,6 +5,12 @@ echo "Starting application..."
 # Change to application directory
 cd /var/www/html
 
+# Manually delete cache files to avoid permission issues
+rm -rf bootstrap/cache/*.php
+rm -rf storage/framework/cache/data/*
+rm -rf storage/framework/views/*
+rm -rf storage/framework/sessions/*
+
 # Clear all caches (ignore errors if cache doesn't exist)
 php artisan config:clear || true
 php artisan route:clear || true
