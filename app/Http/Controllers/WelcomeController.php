@@ -49,6 +49,21 @@ class WelcomeController extends Controller
         ]);
     }
 
+    /**
+     * Welcome page
+     */
+    public function welcome()
+    {
+        return response()->json([
+            'message' => 'Welcome to Insurance Notification System',
+            'status' => 'active',
+            'endpoints' => [
+                '/health' => 'Health check',
+                '/sendPushNotification' => 'Send push notification'
+            ]
+        ]);
+    }
+
    public function sendPushNotification(Request $request)
     {
         $message = $request->textmessage;
