@@ -3,7 +3,7 @@ version: '1.0'
 # Coolify deployment configuration for Insurance Notification System
 deployment:
   type: dockerfile
-  dockerfile: Dockerfile.production
+  dockerfile: Dockerfile
   
 # Environment variables that should be set in Coolify dashboard
 environment:
@@ -31,10 +31,7 @@ environment:
 # Build configuration
 build:
   context: .
-  dockerfile: Dockerfile.production
-  args:
-    - COMPOSER_NO_DEV=1
-    - NPM_PRODUCTION=1
+  dockerfile: Dockerfile
 
 # Health check configuration
 healthcheck:
@@ -70,6 +67,10 @@ volumes:
 
 # Post-deployment commands
 postDeploy:
+  - php artisan cache:clear
+  - php artisan config:clear
+  - php artisan route:clear
+  - php artisan view:clear
   - php artisan migrate --force
   - php artisan config:cache
   - php artisan route:cache
