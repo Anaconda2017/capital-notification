@@ -156,7 +156,8 @@ Route::namespace('BackEnd')->prefix('admin')->middleware('admin')->group(functio
 });
 
 
-Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']], function() {
+// Temporarily disable localization to fix redirect issue
+// Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']], function() {
     Route::get('/', 'WelcomeController@welcome')->name('welcome');
    
    
@@ -181,7 +182,7 @@ Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['lo
     
     Auth::routes();
 
-});
+// });
 
 
 Route::post('/sendPushNotification', 'WelcomeController@sendPushNotification')->name('sendPushNotification');
