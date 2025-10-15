@@ -66,14 +66,17 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 # Copy package files
 COPY package*.json ./
 
-# Install Node.js dependencies
-RUN npm install --only=production
+# Install Node.js dependencies (including dev dependencies for build)
+RUN npm install
 
 # Copy source code
 COPY . .
 
 # Build assets
 RUN npm run production
+
+# Clean up dev dependencies after build
+RUN npm prune --production
 
 # Run composer scripts
 RUN composer run-script post-autoload-dump
