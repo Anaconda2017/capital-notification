@@ -78,6 +78,10 @@ WORKDIR /var/www/html
 # Copy built application from build stage
 COPY --from=build /var/www/html .
 
+# Copy startup script
+COPY start.sh /usr/local/bin/start.sh
+RUN chmod +x /usr/local/bin/start.sh
+
 # Create non-root user
 RUN groupadd -g 1000 www && \
     useradd -u 1000 -g www -s /bin/bash -m www
@@ -163,5 +167,5 @@ RUN echo "[supervisord]" > /etc/supervisor/conf.d/supervisord.conf \
 # Expose port
 EXPOSE 80
 
-# Start supervisor as root (required for nginx and php-fpm)
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
+# Start using the startup script
+CMD ["/usr/local/bin/start.sh"]
