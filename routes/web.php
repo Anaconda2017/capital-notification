@@ -19,13 +19,7 @@ use Mcamara\LaravelLocalization\Facades\LaravelLocalization;
 use App\Http\Controllers\QuestionController;
 
 // Health check endpoint for deployment monitoring
-Route::get('/health', function () {
-    return response()->json([
-        'status' => 'ok',
-        'timestamp' => now(),
-        'service' => 'Insurance Notification System'
-    ]);
-});
+Route::get('/health', 'WelcomeController@health')->name('health');
 
 
 Route::post('/sendManagerNotification/{managerid}/{doctorname}/{protocolname}', 'WelcomeController@sendManagerNotification')->name('sendManagerNotification');

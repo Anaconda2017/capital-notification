@@ -37,6 +37,17 @@ use App\User;
 
 class WelcomeController extends Controller
 {
+    /**
+     * Health check endpoint for deployment monitoring
+     */
+    public function health()
+    {
+        return response()->json([
+            'status' => 'ok',
+            'timestamp' => now(),
+            'service' => 'Insurance Notification System'
+        ]);
+    }
 
    public function sendPushNotification(Request $request)
     {
