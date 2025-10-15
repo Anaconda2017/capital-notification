@@ -66,6 +66,10 @@ RUN composer install --no-dev --optimize-autoloader --no-scripts
 # Copy source code
 COPY . .
 
+# Verify critical files exist
+RUN ls -la public/ && \
+    test -f public/index.php || (echo "ERROR: public/index.php not found!" && exit 1)
+
 # Run composer scripts
 RUN composer run-script post-autoload-dump
 
@@ -77,6 +81,10 @@ WORKDIR /var/www/html
 
 # Copy built application from build stage
 COPY --from=build /var/www/html .
+
+# Verify files were copied correctly
+RUN ls -la /var/www/html/public/ && \
+    test -f /var/www/html/public/index.php || (echo "ERROR: public/index.php missing in production stage!" && exit 1)
 
 # Copy startup script
 COPY start.sh /usr/local/bin/start.sh
