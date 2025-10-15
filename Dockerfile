@@ -1,67 +1,55 @@
-# Use PHP 7.4 FPM Alpine as base
-FROM php:7.4-fpm-alpine
+# ✅ Use PHP 7.4 with Debian (more stable than Alpine)
+FROM php:7.4-fpm
+
+# Set working directory
+WORKDIR /var/www/html
 
 # Install system dependencies
-RUN apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     nginx \
     git \
     curl \
     libpng-dev \
-    libxml2-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libzip-dev \
     zip \
     unzip \
-    oniguruma-dev \
-    freetype-dev \
-    libjpeg-turbo-dev \
-    libwebp-dev \
-    libxpm-dev \
-    postgresql-dev \
-    mysql-dev \
+    libonig-dev \
+    libxml2-dev \
+    libpq-dev \
     nodejs \
     npm \
     supervisor \
-    libzip-dev
-
-# Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-xpm \
-    && docker-php-ext-install -j$(nproc) \
+ && docker-php-ext-configure gd --with-freetype --with-jpeg \
+ && docker-php-ext-install -j$(nproc) \
     pdo \
     pdo_mysql \
     pdo_pgsql \
     mbstring \
     exif \
-    pcntl \
     bcmath \
     gd \
-    zip
+    zip \
+ && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Set working directory
-WORKDIR /var/www/html
+# Copy app files
+COPY . /var/www/html
 
-# Copy project files
-COPY . .
+# Set permissions
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 storage bootstrap/cache
 
-# Permissions
-RUN chown -R www-data:www-data /var/www/html && chmod -R 775 storage bootstrap/cache
+USER www-data
 
-# Install PHP dependencies
-RUN composer install --optimize-autoloader --no-dev
+# Install dependencies
+RUN composer install --no-dev --optimize-autoloader
 
-# Build frontend
+# Build assets
 RUN npm install && npm run production
 
-# Configure Nginx
-RUN mkdir -p /run/nginx
-COPY ./nginx.conf /etc/nginx/conf.d/default.conf
-
-# Supervisor config
-COPY ./supervisord.conf /etc/supervisord.conf
-
-# Expose HTTP port
-EXPOSE 80
-
-# Start Supervisor (runs both Nginx & PHP-FPM)
-CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
+EXPOSE 9000
+CMD ["php-fpm"]
