@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: insurance-notification-app
+    container_name: insurance_notification_app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    volumes:
+      - ./:/var/www/html
+      - ./docker/php/local.ini:/usr/local/etc/php/conf.d/local.ini
+    networks:
+      - insurance_network
+    depends_on:
+      - db
+      - redis
+
+  webserver:
+    image: nginx:alpine
+    container_name: insurance_notification_webserver
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - insurance_network
+    depends_on:
+      - app
+
+  db:
+    image: mysql:8.0
+    container_name: insurance_notification_db
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: insurance_notification
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_USER: insurance_user
+      MYSQL_PASSWORD: insurance_password
+    volumes:
+      - dbdata:/var/lib/mysql
+      - ./docker/mysql/my.cnf:/etc/mysql/my.cnf
+    ports:
+      - "3307:3306"
+    networks:
+      - insurance_network
+
+  redis:
+    image: redis:alpine
+    container_name: insurance_notification_redis
+    restart: unless-stopped
+    ports:
+      - "6380:6379"
+    networks:
+      - insurance_network
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: insurance_notification_phpmyadmin
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: root_password
+    ports:
+      - "8081:80"
+    networks:
+      - insurance_network
+    depends_on:
+      - db
+
+networks:
+  insurance_network:
+    driver: bridge
+
+volumes:
+  dbdata:
+    driver: local
