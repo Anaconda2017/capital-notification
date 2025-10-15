@@ -1,11 +1,9 @@
-# Use PHP 7.4 FPM Alpine image
+# Use PHP 7.4 FPM Alpine as base
 FROM php:7.4-fpm-alpine
-
-# Set working directory
-WORKDIR /var/www/html
 
 # Install system dependencies
 RUN apk add --no-cache \
+    nginx \
     git \
     curl \
     libpng-dev \
@@ -40,32 +38,30 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg --with-webp --with-x
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Copy existing application directory contents
-COPY . /var/www/html
+# Set working directory
+WORKDIR /var/www/html
 
-# Copy existing application directory permissions
-COPY --chown=www-data:www-data . /var/www/html
+# Copy project files
+COPY . .
 
-# Change current user to www
-USER www-data
+# Permissions
+RUN chown -R www-data:www-data /var/www/html && chmod -R 775 storage bootstrap/cache
 
 # Install PHP dependencies
 RUN composer install --optimize-autoloader --no-dev
 
-# Install Node.js dependencies and build assets
+# Build frontend
 RUN npm install && npm run production
 
-# Create storage directories and set permissions
-RUN mkdir -p storage/app/public \
-    storage/framework/cache \
-    storage/framework/sessions \
-    storage/framework/views \
-    storage/logs \
-    bootstrap/cache
+# Configure Nginx
+RUN mkdir -p /run/nginx
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
-# Set permissions
-RUN chmod -R 775 storage bootstrap/cache
+# Supervisor config
+COPY ./supervisord.conf /etc/supervisord.conf
 
-# Expose port 9000 and start php-fpm server
-EXPOSE 9000
-CMD ["php-fpm"]
+# Expose HTTP port
+EXPOSE 80
+
+# Start Supervisor (runs both Nginx & PHP-FPM)
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
