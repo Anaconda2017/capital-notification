@@ -17,6 +17,10 @@ php artisan route:clear || true
 php artisan view:clear || true
 php artisan cache:clear || true
 
+# Force regenerate route cache
+php artisan route:clear
+rm -f bootstrap/cache/routes-v7.php
+
 # Rebuild caches for better performance
 php artisan config:cache || true
 # Temporarily disable route caching to debug
