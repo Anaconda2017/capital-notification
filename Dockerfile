@@ -57,6 +57,9 @@ WORKDIR /var/www/html
 # Copy composer files
 COPY composer.json composer.lock ./
 
+# Create required directories for composer autoload
+RUN mkdir -p database/seeds database/factories
+
 # Install PHP dependencies (without dev dependencies)
 RUN composer install --no-dev --optimize-autoloader --no-scripts
 
