@@ -21,39 +21,17 @@ use App\Http\Controllers\QuestionController;
 // Health check endpoint for deployment monitoring
 Route::get('/health', 'WelcomeController@health')->name('health');
 
+// Welcome page
+Route::get('/', 'WelcomeController@welcome')->name('welcome');
+
 
 Route::post('/sendManagerNotification/{managerid}/{doctorname}/{protocolname}', 'WelcomeController@sendManagerNotification')->name('sendManagerNotification');
 Route::get('/sendManagerNotification/{managerid}/{doctorname}/{protocolname}', 'WelcomeController@sendManagerNotification')->name('sendManagerNotification');
-Route::get('/questions/first', [QuestionController::class, 'showFirstQuestion'])->name('questions.first');
-Route::get('/questions/next/{choiceId}', [QuestionController::class, 'getNextQuestion'])->name('questions.next');
-
-
 
 
 // Temporarily disable localization to fix redirect issue
 // Route::group(['prefix' => LaravelLocalization::setLocale(), 'middleware' => ['localeSessionRedirect', 'localizationRedirect', 'localeViewPath']], function() {
-    Route::get('/', 'WelcomeController@welcome')->name('welcome');
-   
-   
-    Route::get('/privacy-policy', 'WelcomeController@privacyPolicy')->name('privacy-policy');
-   
-    Route::get('/about-us' , 'WelcomeController@aboutUs')->name('about-us');
-    Route::get('/protocols/{id}' , 'WelcomeController@protocols')->name('protocols');
-    Route::get('/newsletter' , 'WelcomeController@newsletter')->name('newsletter');
-    Route::post('/protocolsearch' , 'WelcomeController@protocolsearch')->name('protocolsearch');
-    
-    
-    
-    Route::get('/services' , 'WelcomeController@services')->name('services');
-    Route::get('/allblogs' , 'WelcomeController@allblogs')->name('allblogs');
-    Route::get('/blogdetail/{slug}' , 'WelcomeController@blogdetail')->name('blogdetail');
-    Route::get('/subcategory/{slug}' , 'WelcomeController@subcategory')->name('subcategory');
-    Route::get('/subcategory-blog/{slug}' , 'WelcomeController@subcategoryBlog')->name('subcategory-blog');
 
-
-    Route::get('/contact-us' , 'WelcomeController@contactUs')->name('contact-us');
-    Route::post('/sendMessage' , 'WelcomeController@sendMessage')->name('sendMessage');
-    
     Auth::routes();
 
 // });
