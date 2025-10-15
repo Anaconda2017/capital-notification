@@ -86,18 +86,19 @@ RUN chmod +x /usr/local/bin/start.sh
 RUN groupadd -g 1000 www && \
     useradd -u 1000 -g www -s /bin/bash -m www
 
-# Set ownership
-RUN chown -R www:www /var/www/html
-
-# Create necessary directories and set permissions
+# Create necessary directories first
 RUN mkdir -p storage/app/public \
     storage/framework/cache \
     storage/framework/sessions \
     storage/framework/views \
     storage/logs \
-    bootstrap/cache \
-    && chown -R www:www storage bootstrap/cache \
-    && chmod -R 775 storage bootstrap/cache
+    bootstrap/cache
+
+# Set ownership and permissions
+RUN chown -R www:www /var/www/html \
+    && chmod -R 755 /var/www/html \
+    && chmod -R 775 storage bootstrap/cache \
+    && chmod -R 755 public
 
 # Configure PHP-FPM
 RUN echo "listen = 127.0.0.1:9000" >> /usr/local/etc/php-fpm.d/www.conf \
